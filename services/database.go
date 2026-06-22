@@ -254,6 +254,13 @@ func initSchema(db *sql.DB) error {
 
 // seedDefaultAdmin 创建默认管理员账号
 func seedDefaultAdmin(db *sql.DB) error {
+    // ✅ 添加日志：打印使用的密码
+    password := os.Getenv("ADMIN_PASSWORD")
+    if password == "" {
+        password = "admin123"
+    }
+    log.Printf("[seedDefaultAdmin] Using admin password: %s", password) 
+	
 	var adminRoleID string
 	for _, role := range models.DefaultRoles {
 		permissionsJSON, err := json.Marshal(role.Permissions)
