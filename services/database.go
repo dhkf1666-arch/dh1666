@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	// "strconv"
 	"strings"
 	"time"
 
-	// "github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 
 	_ "github.com/lib/pq"
@@ -18,6 +16,7 @@ import (
 	"enterprise-agent/backend/models"
 )
 
+// NewDatabase 创建数据库连接
 func NewDatabase() *sql.DB {
 	// ✅ 优先使用 DATABASE_URL（Render/Aiven 推荐方式）
 	if dbURL := os.Getenv("DATABASE_URL"); dbURL != "" {
@@ -86,6 +85,7 @@ func NewDatabase() *sql.DB {
 	return db
 }
 
+// envOr 获取环境变量，如果不存在则返回默认值
 func envOr(key, fallback string) string {
 	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
 		return v
@@ -93,6 +93,7 @@ func envOr(key, fallback string) string {
 	return fallback
 }
 
+// initSchema 初始化数据库表结构
 func initSchema(db *sql.DB) error {
 	statements := []string{
 		`CREATE TABLE IF NOT EXISTS users (
@@ -216,13 +217,7 @@ func initSchema(db *sql.DB) error {
 			target_name VARCHAR(255),
 			ip_address VARCHAR(45),
 			user_agent TEXT,
-			request_method VARCHAR(10),
-			request_path VARCHAR(255),
-			request_params TEXT,
-			response_status INTEGER,
 			execution_time_ms INTEGER DEFAULT 0,
-			old_value TEXT,
-			new_value TEXT,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_operation_logs_operator_name ON operation_logs(operator_name)`,
@@ -257,6 +252,7 @@ func initSchema(db *sql.DB) error {
 	return nil
 }
 
+// seedDefaultAdmin 创建默认管理员账号
 func seedDefaultAdmin(db *sql.DB) error {
 	var adminRoleID string
 	for _, role := range models.DefaultRoles {
