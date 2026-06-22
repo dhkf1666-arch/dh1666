@@ -19,6 +19,34 @@ import (
 )
 
 func NewDatabase() *sql.DB {
+	// ✅ 优先使用 DATABASE_URL（Render/Aiven 推荐方式）
+	if dbURL := os.Getenv("DATABASE_URL"); dbURL != "" {
+		log.Println("Using DATABASE_URL for PostgreSQL connection")
+		db, err := sql.Open("postgres", dbURL)
+		if err != nil {
+			panic(fmt.Sprintf("failed to open database: %v", err))
+		}
+
+		db.SetMaxOpenConns(30)
+		db.SetMaxIdleConns(10)
+		db.SetConnMaxLifetime(5 * time.Minute)
+
+		if err := db.Ping(); err != nil {
+			panic(fmt.Sprintf("failed to ping database: %v", err))
+		}
+
+		if err := initSchema(db); err != nil {
+			panic(fmt.Sprintf("failed to initialize schema: %v", err))
+		}
+		if err := seedDefaultAdmin(db); err != nil {
+			panic(fmt.Sprintf("failed to seed default admin: %v", err))
+		}
+
+		log.Println("PostgreSQL connected successfully via DATABASE_URL")
+		return db
+	}
+
+	// 原有的单独配置方式（支持 SSL）
 	host := envOr("DB_HOST", "localhost")
 	port := envOr("DB_PORT", "5432")
 	user := envOr("DB_USER", "admin")
@@ -27,10 +55,11 @@ func NewDatabase() *sql.DB {
 		password = "admin123"
 	}
 	dbname := envOr("DB_NAME", "dhpg_admin")
+	sslmode := envOr("DB_SSLMODE", "require") // ✅ 默认改为 require（Aiven 需要）
 
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname,
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		host, port, user, password, dbname, sslmode,
 	)
 
 	db, err := sql.Open("postgres", dsn)
@@ -55,20 +84,6 @@ func NewDatabase() *sql.DB {
 
 	log.Println("PostgreSQL connected successfully")
 	return db
-}
-
-func NewRedis() *redis.Client {
-	addr := envOr("REDIS_ADDR", "localhost:6379")
-	password := os.Getenv("REDIS_PASSWORD")
-	dbNum := 0
-	if dbStr := os.Getenv("REDIS_DB"); dbStr != "" {
-		dbNum, _ = strconv.Atoi(dbStr)
-	}
-	return redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       dbNum,
-	})
 }
 
 func envOr(key, fallback string) string {
