@@ -31,7 +31,8 @@ const toCamelCase = (obj: any): any => {
   });
 };
 
-const apiBase = "https://dh1666.onrender.com/api/v1";
+// 确保 API 地址正确
+const apiBase = import.meta.env.VITE_API_BASE_URL || "https://dh1666.onrender.com/api/v1";
 
 const request: AxiosInstance = axios.create({
   baseURL: apiBase,
