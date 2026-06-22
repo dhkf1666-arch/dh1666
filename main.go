@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 
 	"enterprise-agent/backend/handlers"
 	"enterprise-agent/backend/middleware"
@@ -43,21 +44,7 @@ func main() {
 
 	db := services.NewDatabase()
 	
-	// ============================================================
-	// ✅ 注释掉 Redis（暂时不使用）
-	// ============================================================
-	// redis := services.NewRedis()
-	// if redis != nil {
-	// 	pingCtx, pingCancel := context.WithTimeout(context.Background(), 3*time.Second)
-	// 	if err := redis.Ping(pingCtx).Err(); err != nil {
-	// 		log.Printf("Warning: Redis ping failed at startup: %v", err)
-	// 	} else {
-	// 		log.Println("Redis connection verified")
-	// 	}
-	// 	pingCancel()
-	// }
-	
-	// ✅ 使用 nil 替代 Redis
+	// ✅ Redis 暂时禁用
 	var redis *redis.Client = nil
 	log.Println("Redis is disabled (set to nil)")
 
