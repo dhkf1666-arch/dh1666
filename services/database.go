@@ -292,7 +292,7 @@ func seedDefaultAdmin(db *sql.DB) error {
 	}
 
 	username := envOr("ADMIN_USERNAME", "admin")
-	password := os.Getenv("ADMIN_PASSWORD")
+	// password := os.Getenv("ADMIN_PASSWORD")
 	if password == "" {
 		password = "admin123"
 	}
