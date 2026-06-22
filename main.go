@@ -42,16 +42,24 @@ func main() {
 	}
 
 	db := services.NewDatabase()
-	redis := services.NewRedis()
-	if redis != nil {
-		pingCtx, pingCancel := context.WithTimeout(context.Background(), 3*time.Second)
-		if err := redis.Ping(pingCtx).Err(); err != nil {
-			log.Printf("Warning: Redis ping failed at startup: %v", err)
-		} else {
-			log.Println("Redis connection verified")
-		}
-		pingCancel()
-	}
+	
+	// ============================================================
+	// ✅ 注释掉 Redis（暂时不使用）
+	// ============================================================
+	// redis := services.NewRedis()
+	// if redis != nil {
+	// 	pingCtx, pingCancel := context.WithTimeout(context.Background(), 3*time.Second)
+	// 	if err := redis.Ping(pingCtx).Err(); err != nil {
+	// 		log.Printf("Warning: Redis ping failed at startup: %v", err)
+	// 	} else {
+	// 		log.Println("Redis connection verified")
+	// 	}
+	// 	pingCancel()
+	// }
+	
+	// ✅ 使用 nil 替代 Redis
+	var redis *redis.Client = nil
+	log.Println("Redis is disabled (set to nil)")
 
 	userRepo := services.NewUserRepository(db)
 
