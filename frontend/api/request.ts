@@ -31,7 +31,7 @@ const toCamelCase = (obj: any): any => {
   });
 };
 
-const apiBase = (import.meta.env.VITE_API_BASE_URL as string) || "/api/v1";
+const apiBase = "https://dh1666.onrender.com/api/v1";
 
 const request: AxiosInstance = axios.create({
   baseURL: apiBase,
