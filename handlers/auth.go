@@ -26,6 +26,12 @@ func NewAuthHandler(db *sql.DB, redis *redis.Client) *AuthHandler {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
+    if h == nil || h.db == nil {
+        log.Printf("Login failed: AuthHandler or db is nil")
+        models.SendError(c, 500, 5000, "Database not initialized")
+        return
+    }
+	
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Printf("Login bind error: %v", err)
